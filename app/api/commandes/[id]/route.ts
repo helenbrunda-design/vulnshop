@@ -12,7 +12,7 @@ export async function GET(
   const db = getDb();
 
   // ⚠️ FAILLE (IDOR) : on renvoie la commande SANS vérifier à QUI elle appartient
-  const rows = db("SELECT * FROM orders WHERE id = ?", [Number(id)]);
+  const rows = db("SELECT * FROM orders WHERE id = ?", [Number(id)]) as any[];
   if (!rows.length) {
     return NextResponse.json({ error: "Commande introuvable" }, { status: 404 });
   }
