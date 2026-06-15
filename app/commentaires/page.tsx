@@ -1,23 +1,17 @@
-// app/api/login/route.ts — ⚠️ CODE VOLONTAIREMENT VULNÉRABLE (labo)
-import { NextRequest, NextResponse } from "next/server";
-import { users } from "@/lib/db";
+// app/commentaires/page.tsx — ⚠️ CODE VOLONTAIREMENT VULNÉRABLE (labo)
+import { comments } from "@/lib/db";
 
-export async function POST(req: NextRequest) {
-  const { email, password } = await req.json();
-
-  // On cherche l'utilisateur qui correspond
-  const user = users.find(
-    (u) => u.email === email && u.password === password
+export default function CommentairesPage() {
+  return (
+    <main style={{ padding: 24 }}>
+      <h1>Commentaires</h1>
+      {comments.map((c) => (
+        <div key={c.id}>
+          <b>{c.author} :</b>{" "}
+          {/* ⚠️ on injecte du HTML brut venu d'un utilisateur */}
+          <span dangerouslySetInnerHTML={{ __html: c.html }} />
+        </div>
+      ))}
+    </main>
   );
-
-  if (!user) {
-    // ⚠️ message d'erreur trop bavard
-    return NextResponse.json(
-      { error: `Aucun utilisateur ${email} avec ce mot de passe` },
-      { status: 401 }
-    );
-  }
-
-  // ⚠️ on renvoie TOUT l'objet user, mot de passe compris
-  return NextResponse.json({ message: "Connecté", user });
 }
