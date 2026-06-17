@@ -1,0 +1,7 @@
+rules:
+  - id: vulnshop-dangerously-set-inner-html
+    languages: [ts]
+    severity: ERROR
+    message: "Usage de dangerouslySetInnerHTML : injection de HTML brut (__html). Risque XSS si la donnee n'est pas echappee."
+    patterns:
+      - pattern: "<$EL dangerouslySetInnerHTML={{ __html: $X }} />"
