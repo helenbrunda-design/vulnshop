@@ -9,11 +9,23 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params; // ⚙️ en Next 15+, params est asynchrone → on l'attend
+ 
+  // ✅ on identifie le demandeur via le cookie de session
+  const sessionId = req.cookies.get("vulnshop_session")?.value;
+  if (!sessionId) {
+    return NextResponse.json({ error: "Non connecté" }, { status: 401 });
+  }
+
   const db = getDb();
 
-  // ⚠️ FAILLE (IDOR) : on renvoie la commande SANS vérifier à QUI elle appartient
-  const rows = db("SELECT * FROM orders WHERE id = ?", [Number(id)]) as any[];
+  // ✅ on ne renvoie la commande QUE si elle appartient au demandeur
+  const rows = db(
+    "SELECT * FROM orders WHERE id = ? AND userId = ?",
+    [Number(id), Number(sessionId)]
+  ) as Array<{ id: number; userId: number; produit: string; montant: number }>;
+
   if (!rows.length) {
+    // 404 volontaire : on ne dit pas "elle existe mais elle n'est pas à toi"
     return NextResponse.json({ error: "Commande introuvable" }, { status: 404 });
   }
   return NextResponse.json({ commande: rows[0] });
